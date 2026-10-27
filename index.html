@@ -1,1 +1,1319 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>កាលវិភាគសាលា PRO - ប្រព័ន្ធគ្រប់គ្រងកាលវិភាគស្វ័យប្រវត្តិ</title>
+  <!-- Google Fonts: Kantumruy Pro & Battambang for Authentic Khmer Typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Kantumruy+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Kantumruy Pro', 'Battambang', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#EEF2FF',
+              100: '#E0E7FF',
+              500: '#6366F1',
+              600: '#4F46E5',
+              700: '#4338CA',
+              800: '#3730A3',
+              900: '#312E81',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Kantumruy Pro', sans-serif;
+    }
+    .custom-scroll::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    .custom-scroll::-webkit-scrollbar-thumb {
+      background-color: #CBD5E1;
+      border-radius: 9999px;
+    }
+    @media print {
+      .no-print {
+        display: none !important;
+      }
+      .print-only {
+        display: block !important;
+      }
+      body {
+        background: white !important;
+        color: black !important;
+      }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 antialiased min-h-screen">
+  <div id="app" class="flex h-screen overflow-hidden">
+    
+    <!-- SIDEBAR NAVIGATION -->
+    <aside class="w-64 bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 no-print custom-scroll overflow-y-auto">
+      <div>
+        <!-- Brand Header -->
+        <div class="p-4 border-b border-slate-100 flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-brand-600 text-white flex items-center justify-center text-xl shadow-md shadow-brand-500/20">
+            <i class="fa-solid fa-calendar-days"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold text-slate-900 leading-tight">កាលវិភាគសាលា</span>
+              <span class="bg-brand-100 text-brand-600 text-[10px] font-bold px-1.5 py-0.5 rounded">PRO</span>
+            </div>
+            <p class="text-[11px] text-slate-400">ប្រព័ន្ធគ្រប់គ្រងកាលវិភាគ</p>
+          </div>
+        </div>
 
+        <!-- School Selector Card -->
+        <div class="p-3">
+          <div class="flex items-center justify-between text-xs text-slate-500 mb-1.5 px-1">
+            <span>គ្រឹះស្ថានសិក្សា</span>
+            <button @click="showSchoolModal = true" class="text-brand-600 hover:text-brand-700 font-medium">+ សាលាថ្មី</button>
+          </div>
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-2.5">
+            <div class="flex items-center justify-between">
+              <div class="flex items-center gap-2 overflow-hidden">
+                <i class="fa-solid fa-school text-slate-400 text-sm"></i>
+                <span class="text-xs font-semibold text-slate-800 truncate">{{ school.name }}</span>
+              </div>
+              <button class="text-xs text-brand-600 hover:underline">ប្តូរ ▾</button>
+            </div>
+            <div class="flex items-center justify-between mt-2 pt-2 border-t border-slate-200/60 text-[11px]">
+              <span class="text-slate-500">{{ school.year }}</span>
+              <span class="text-emerald-600 bg-emerald-50 px-1.5 py-0.5 rounded font-medium">• ដើម (Default)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="px-3 space-y-6 mt-2">
+          <!-- Group 1: ទិន្នន័យគ្រឹះ -->
+          <div>
+            <div class="flex items-center justify-between px-2 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              <span>ទិន្នន័យគ្រឹះ</span>
+              <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 rounded">៦ ផ្នែក</span>
+            </div>
+            <div class="space-y-0.5">
+              <button @click="activeTab = 'dashboard'" :class="navClass('dashboard')">
+                <i class="fa-solid fa-chart-pie w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">ទំព័រដើម</span>
+              </button>
+              <button @click="activeTab = 'subjects'" :class="navClass('subjects')">
+                <i class="fa-solid fa-book w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">មុខវិជ្ជា</span>
+                <span class="text-[10px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded-full font-bold">{{ subjects.length }}</span>
+              </button>
+              <button @click="activeTab = 'curriculum'" :class="navClass('curriculum')">
+                <i class="fa-solid fa-list-check w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">កម្មវិធីសិក្សា (ម៉ោង)</span>
+              </button>
+              <button @click="activeTab = 'teachers'" :class="navClass('teachers')">
+                <i class="fa-solid fa-user-tie w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">គ្រូបង្រៀន</span>
+                <span class="text-[10px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded-full font-bold">{{ teachers.length }}</span>
+              </button>
+              <button @click="activeTab = 'classes'" :class="navClass('classes')">
+                <i class="fa-solid fa-graduation-cap w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">ថ្នាក់រៀន</span>
+                <span class="text-[10px] bg-brand-100 text-brand-700 px-1.5 py-0.5 rounded-full font-bold">{{ classes.length }}</span>
+              </button>
+              <button @click="activeTab = 'duties'" :class="navClass('duties')">
+                <i class="fa-solid fa-clipboard-user w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">ភារកិច្ចគ្រូ</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Group 2: កាលវិភាគ & របាយការណ៍ -->
+          <div>
+            <div class="flex items-center justify-between px-2 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              <span>កាលវិភាគ & របាយការណ៍</span>
+              <span class="text-[10px] bg-slate-100 text-slate-500 px-1.5 rounded">៤ ផ្នែក</span>
+            </div>
+            <div class="space-y-0.5">
+              <button @click="activeTab = 'timetable'" :class="navClass('timetable')">
+                <i class="fa-solid fa-calendar-day w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">កាលវិភាគ</span>
+              </button>
+              <button @click="activeTab = 'live_tracker'" :class="navClass('live_tracker')">
+                <i class="fa-solid fa-clock-rotate-left w-5 text-center text-emerald-500"></i>
+                <span class="flex-1 text-left text-xs font-medium text-emerald-600">តាមដានម៉ោងសិក្សា</span>
+                <span class="relative flex h-2 w-2">
+                  <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                </span>
+              </button>
+              <button @click="activeTab = 'overtime'" :class="navClass('overtime')">
+                <i class="fa-solid fa-money-bill-wave w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">ម៉ោងបន្ថែម</span>
+              </button>
+              <button @click="activeTab = 'years'" :class="navClass('years')">
+                <i class="fa-solid fa-clock-rotate-left w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">ឆ្នាំសិក្សា & កំណែ</span>
+              </button>
+              <button @click="activeTab = 'print_hub'" :class="navClass('print_hub')">
+                <i class="fa-solid fa-print w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">បោះពុម្ព</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Group 3: ឧបករណ៍ & ការកំណត់ -->
+          <div>
+            <div class="px-2 text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-1">
+              <span>ឧបករណ៍ & ការកំណត់</span>
+            </div>
+            <div class="space-y-0.5">
+              <button @click="activeTab = 'batch_excel'" :class="navClass('batch_excel')">
+                <i class="fa-solid fa-table-cells w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">បញ្ចូលរហ័ស (ដូច Excel)</span>
+              </button>
+              <button @click="activeTab = 'excel_io'" :class="navClass('excel_io')">
+                <i class="fa-solid fa-file-excel w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">Excel នាំចូល/នាំចេញ</span>
+              </button>
+              <button @click="activeTab = 'settings'" :class="navClass('settings')">
+                <i class="fa-solid fa-gear w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">ការកំណត់</span>
+              </button>
+              <button @click="activeTab = 'guide'" :class="navClass('guide')">
+                <i class="fa-solid fa-circle-question w-5 text-center"></i>
+                <span class="flex-1 text-left text-xs font-medium">ណែនាំពីរបៀបប្រើ</span>
+              </button>
+            </div>
+          </div>
+        </nav>
+      </div>
+
+      <!-- User Profile & Footer Controls -->
+      <div class="p-3 border-t border-slate-100 bg-slate-50/50">
+        <!-- Admin Profile -->
+        <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200/80 shadow-sm mb-2">
+          <div class="flex items-center gap-2 overflow-hidden">
+            <div class="w-8 h-8 rounded-lg bg-amber-500 text-white flex items-center justify-center text-xs font-bold">
+              <i class="fa-solid fa-crown"></i>
+            </div>
+            <div class="overflow-hidden">
+              <div class="flex items-center gap-1">
+                <span class="text-xs font-bold text-slate-800 truncate">Admin</span>
+                <span class="bg-amber-100 text-amber-700 text-[9px] px-1 rounded font-bold">ADMIN</span>
+              </div>
+              <p class="text-[10px] text-slate-400 truncate">មើលឃើញគ្រប់សាលា</p>
+            </div>
+          </div>
+          <button @click="showLoginModal = true" class="text-xs text-slate-400 hover:text-slate-600">
+            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+          </button>
+        </div>
+
+        <button @click="showAdminCenter = true" class="w-full py-1.5 px-2 bg-amber-50 text-amber-800 border border-amber-200 rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 hover:bg-amber-100 transition-colors mb-2">
+          <i class="fa-solid fa-key text-amber-600"></i>
+          <span>គ្រប់គ្រងកូដ & សំណើ (3 ទំនេរ)</span>
+        </button>
+
+        <div class="flex items-center justify-between text-[11px] text-slate-400 px-1">
+          <span class="flex items-center gap-1 text-emerald-600">
+            <i class="fa-solid fa-circle-check"></i> Auto-Saved
+          </span>
+          <button class="flex items-center gap-1 hover:text-slate-600">
+            <i class="fa-solid fa-moon"></i> Dark
+          </button>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col overflow-hidden bg-slate-50">
+      
+      <!-- TOP NAVBAR -->
+      <header class="h-14 bg-white border-b border-slate-200 px-6 flex items-center justify-between no-print shrink-0">
+        <div class="flex items-center gap-3">
+          <h1 class="text-base font-bold text-slate-800 flex items-center gap-2">
+            <i :class="tabIcon(activeTab)" class="text-brand-600"></i>
+            <span>{{ tabTitle(activeTab) }}</span>
+          </h1>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="flex items-center gap-1.5 text-xs text-slate-600 bg-slate-100 px-3 py-1.5 rounded-lg border border-slate-200">
+            <i class="fa-solid fa-school text-brand-600"></i>
+            <span>{{ school.name }}</span>
+          </div>
+          <button @click="showAdminCenter = true" class="flex items-center gap-1.5 text-xs font-medium text-amber-800 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-lg border border-amber-200 transition-colors">
+            <i class="fa-solid fa-key text-amber-600"></i>
+            <span>Admin Center (កូដ & សំណើ)</span>
+          </button>
+          <div class="flex items-center gap-1 text-xs font-bold text-amber-600 bg-amber-50 border border-amber-200 px-2.5 py-1.5 rounded-lg">
+            <i class="fa-solid fa-crown text-amber-500"></i>
+            <span>Admin</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- SCROLLABLE PAGE BODY -->
+      <div class="flex-1 overflow-y-auto custom-scroll p-6">
+        
+        <!-- ================= PAGE 1: DASHBOARD ================= -->
+        <div v-if="activeTab === 'dashboard'" class="space-y-6">
+          <!-- Metric Cards -->
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold text-slate-400">ថ្នាក់រៀន</p>
+                <h3 class="text-3xl font-extrabold text-brand-600 mt-1">{{ classes.length }}</h3>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-graduation-cap"></i>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold text-slate-400">គ្រូបង្រៀន</p>
+                <h3 class="text-3xl font-extrabold text-emerald-600 mt-1">{{ teachers.length }}</h3>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-chalkboard-user"></i>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold text-slate-400">មុខវិជ្ជា</p>
+                <h3 class="text-3xl font-extrabold text-indigo-600 mt-1">{{ subjects.length }}</h3>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-book-open"></i>
+              </div>
+            </div>
+
+            <div class="bg-white border border-slate-200 p-5 rounded-2xl shadow-sm flex items-center justify-between">
+              <div>
+                <p class="text-xs font-semibold text-slate-400">បន្ទប់រៀន</p>
+                <h3 class="text-3xl font-extrabold text-amber-600 mt-1">{{ rooms.length }}/{{ rooms.length }}</h3>
+              </div>
+              <div class="w-12 h-12 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-door-open"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Setup Checklist & Overview -->
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- 7-Step Setup Card -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
+              <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-list-check text-brand-600"></i>
+                <span>ជំហានរៀបចំកាលវិភាគ</span>
+              </h2>
+              <div class="space-y-3">
+                <div v-for="(step, idx) in setupSteps" :key="idx" 
+                     @click="activeTab = step.tab"
+                     class="flex items-center justify-between p-3 rounded-xl border border-slate-100 hover:border-brand-200 hover:bg-brand-50/30 cursor-pointer transition-all">
+                  <div class="flex items-center gap-3">
+                    <div :class="step.done ? 'bg-emerald-500 text-white' : 'bg-slate-200 text-slate-400'" 
+                         class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold">
+                      <i v-if="step.done" class="fa-solid fa-check"></i>
+                      <span v-else>{{ idx + 1 }}</span>
+                    </div>
+                    <span class="text-xs font-semibold text-slate-700">{{ step.title }}</span>
+                  </div>
+                  <i class="fa-solid fa-chevron-right text-xs text-slate-400"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- Timetable Readiness Card -->
+            <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm flex flex-col justify-between">
+              <div>
+                <h2 class="text-base font-bold text-slate-900 mb-2">ផ្ទាំងគ្រប់គ្រងទិន្នន័យ (ថ្នាក់/គ្រូ/បន្ទប់/ម៉ោងបង្រៀន)</h2>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                  ទិន្នន័យទាំងអស់ត្រូវបានត្រួតពិនិត្យ និងផ្ទៀងផ្ទាត់ដោយស្វ័យប្រវត្តិ។ លោកអ្នកអាចចុចប៊ូតុងខាងក្រោមដើម្បីចូលទៅកាន់ម៉ាស៊ីនរៀបចំកាលវិភាគ ឬពិនិត្យម៉ោងបង្រៀនជាក់ស្ដែង។
+                </p>
+                <div class="mt-6 p-4 rounded-xl bg-slate-50 border border-slate-100 space-y-2">
+                  <div class="flex justify-between text-xs">
+                    <span class="text-slate-500">ស្ថានភាពរៀបកាលវិភាគ៖</span>
+                    <span class="font-bold text-emerald-600">រួចរាល់ 100%</span>
+                  </div>
+                  <div class="w-full bg-slate-200 rounded-full h-2">
+                    <div class="bg-emerald-500 h-2 rounded-full w-full"></div>
+                  </div>
+                </div>
+              </div>
+              <div class="mt-6 flex gap-3">
+                <button @click="activeTab = 'timetable'" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-brand-500/20 flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-wand-magic-sparkles"></i>
+                  <span>រៀបកាលវិភាគស្វ័យប្រវត្តិ</span>
+                </button>
+                <button @click="activeTab = 'live_tracker'" class="flex-1 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition shadow-md shadow-emerald-500/20 flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-clock"></i>
+                  <span>តាមដានម៉ោងបង្រៀន Live</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= PAGE 2: SUBJECTS ================= -->
+        <div v-if="activeTab === 'subjects'" class="space-y-4">
+          <!-- Add Subject Bar -->
+          <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex flex-wrap items-center gap-3">
+            <input v-model="newSubject.name" placeholder="ឈ្មោះមុខវិជ្ជា (ឧ. គណិតវិទ្យា)" class="flex-1 min-w-[180px] text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-brand-500">
+            <input v-model="newSubject.shortName" placeholder="ឈ្មោះខ្លី (ឧ. គណិត)" class="w-36 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-brand-500">
+            <input v-model="newSubject.code" placeholder="កូដ ឧ. M" class="w-28 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-brand-500 uppercase">
+            <input v-model="newSubject.color" type="color" class="w-10 h-9 p-0.5 border border-slate-200 rounded-xl cursor-pointer">
+            <button @click="addSubject" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-500/20 flex items-center gap-1.5 transition">
+              <i class="fa-solid fa-plus"></i>
+              <span>បន្ថែម</span>
+            </button>
+          </div>
+
+          <!-- Subjects Table -->
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase tracking-wider text-[11px]">
+                <tr>
+                  <th class="py-3 px-4 w-12 text-center">ល.រ</th>
+                  <th class="py-3 px-4">ឈ្មោះមុខវិជ្ជា</th>
+                  <th class="py-3 px-4">ឈ្មោះខ្លី</th>
+                  <th class="py-3 px-4 text-center">កូដ</th>
+                  <th class="py-3 px-4 text-center">ពណ៌</th>
+                  <th class="py-3 px-4 text-center">ប្រើប្រាស់</th>
+                  <th class="py-3 px-4 text-center">ម៉ោងបិទ</th>
+                  <th class="py-3 px-4 w-12 text-center">សកម្មភាព</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="(sub, idx) in subjects" :key="idx" class="hover:bg-slate-50/80 transition">
+                  <td class="py-3 px-4 text-center text-slate-400 font-medium">{{ idx + 1 }}</td>
+                  <td class="py-3 px-4 font-bold text-slate-800">{{ sub.name }}</td>
+                  <td class="py-3 px-4">
+                    <input v-model="sub.shortName" class="border border-slate-200 rounded-lg px-2.5 py-1 text-xs w-28">
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <span class="inline-block bg-slate-100 border border-slate-200 px-2.5 py-1 rounded-lg font-bold text-slate-800">{{ sub.code }}</span>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <span class="inline-block w-6 h-6 rounded-lg shadow-sm" :style="{ backgroundColor: sub.color }"></span>
+                  </td>
+                  <td class="py-3 px-4 text-center font-medium text-slate-600">52 កន្លែង</td>
+                  <td class="py-3 px-4 text-center">
+                    <button class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-slate-600 text-[11px] font-medium flex items-center gap-1 mx-auto">
+                      <i class="fa-solid fa-calendar-xmark text-slate-400"></i> ម៉ោងបិទ
+                    </button>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <button @click="deleteSubject(idx)" class="text-rose-500 hover:text-rose-700 text-sm">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= PAGE 3: CURRICULUM ================= -->
+        <div v-if="activeTab === 'curriculum'" class="space-y-4">
+          <div class="flex items-center justify-between bg-white border border-slate-200 p-4 rounded-2xl shadow-sm">
+            <div>
+              <h2 class="text-sm font-bold text-slate-800">កម្មវិធីសិក្សា (ម៉ោង/សប្ដាហ៍)</h2>
+              <p class="text-xs text-slate-500">កំណត់មុខវិជ្ជា និងចំនួនម៉ោងក្នុងមួយសប្ដាហ៍ សម្រាប់កម្រិតថ្នាក់នីមួយៗ</p>
+            </div>
+            <div class="flex gap-2">
+              <button class="px-3 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-file-import"></i> នាំចូលគំរូ
+              </button>
+              <button class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-500/20 flex items-center gap-1.5">
+                <i class="fa-solid fa-plus"></i> បង្កើតថ្មី
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left: Tracks List -->
+            <div class="space-y-3">
+              <div @click="selectedTrack = 'science'" 
+                   :class="selectedTrack === 'science' ? 'border-brand-500 bg-brand-50/30 ring-1 ring-brand-500' : 'border-slate-200 bg-white'"
+                   class="p-4 rounded-2xl border cursor-pointer transition shadow-sm">
+                <div class="flex justify-between items-center">
+                  <h3 class="text-xs font-bold text-slate-900">វិទ្យាល័យ - វិទ្យាសាស្ត្រពិត</h3>
+                  <span class="text-[11px] font-semibold text-brand-600 bg-brand-100 px-2 py-0.5 rounded-full">32 ម៉ោង/សប្ដាហ៍</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">ថ្នាក់អនុវត្ត៖ ១២ ក, ១២ ខ</p>
+              </div>
+
+              <div @click="selectedTrack = 'social'" 
+                   :class="selectedTrack === 'social' ? 'border-brand-500 bg-brand-50/30 ring-1 ring-brand-500' : 'border-slate-200 bg-white'"
+                   class="p-4 rounded-2xl border cursor-pointer transition shadow-sm">
+                <div class="flex justify-between items-center">
+                  <h3 class="text-xs font-bold text-slate-900">វិទ្យាល័យ - វិទ្យាសាស្ត្រសង្គម</h3>
+                  <span class="text-[11px] font-semibold text-brand-600 bg-brand-100 px-2 py-0.5 rounded-full">32 ម៉ោង/សប្ដាហ៍</span>
+                </div>
+                <p class="text-[11px] text-slate-400 mt-1">ថ្នាក់អនុវត្ត៖ ១២ គ, ១២ ឃ</p>
+              </div>
+            </div>
+
+            <!-- Right: Subject Hours Table -->
+            <div class="lg:col-span-2 bg-white border border-slate-200 rounded-2xl shadow-sm p-5 space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                  <h3 class="text-sm font-bold text-slate-900">{{ selectedTrack === 'science' ? 'វិទ្យាល័យ - វិទ្យាសាស្ត្រពិត' : 'វិទ្យាល័យ - វិទ្យាសាស្ត្រសង្គម' }}</h3>
+                  <p class="text-xs text-slate-400">សរុប 32 ម៉ោង/សប្ដាហ៍ • ថ្នាក់ប្រើ: 12A, 12B</p>
+                </div>
+                <div class="flex gap-2">
+                  <button class="px-2.5 py-1 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-arrows-rotate"></i> អនុវត្តទៅថ្នាក់</button>
+                  <button class="px-2.5 py-1 text-xs border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50"><i class="fa-solid fa-copy"></i> ចម្លង</button>
+                  <button class="px-2.5 py-1 text-xs border border-rose-200 text-rose-600 rounded-lg hover:bg-rose-50"><i class="fa-solid fa-trash"></i> លុប</button>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <div v-for="(sub, idx) in subjects" :key="idx" class="flex items-center justify-between p-2.5 rounded-xl border border-slate-100 hover:bg-slate-50 transition">
+                  <div class="flex items-center gap-2">
+                    <span class="w-3 h-3 rounded-full" :style="{ backgroundColor: sub.color }"></span>
+                    <span class="text-xs font-semibold text-slate-800">{{ sub.name }}</span>
+                  </div>
+                  <div class="flex items-center gap-3">
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-[11px] text-slate-400">ម៉ោង/សប្តាហ៍:</span>
+                      <input type="number" value="4" class="w-16 border border-slate-200 rounded-lg px-2 py-1 text-xs text-center font-bold">
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <span class="text-[11px] text-slate-400">អតិបរមា/ថ្ងៃ:</span>
+                      <select class="border border-slate-200 rounded-lg px-2 py-1 text-xs font-medium">
+                        <option>2 ម៉ោង</option>
+                        <option>1 ម៉ោង</option>
+                        <option>3 ម៉ោង</option>
+                      </select>
+                    </div>
+                    <button class="text-rose-400 hover:text-rose-600 text-xs"><i class="fa-solid fa-trash"></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= PAGE 4: TEACHERS ================= -->
+        <div v-if="activeTab === 'teachers'" class="space-y-4">
+          <!-- Official MoEYS Workload Banner -->
+          <div class="bg-indigo-50/60 border border-indigo-100 rounded-2xl p-4 text-xs space-y-2">
+            <div class="flex flex-wrap items-center gap-4 text-indigo-950 font-semibold">
+              <span class="text-indigo-800 font-bold"><i class="fa-solid fa-scale-balanced mr-1"></i> ម៉ោងកំណត់ (ស្វ័យប្រវត្តិ)៖</span>
+              <div class="flex items-center gap-1">គ្រូឧត្តម (១០-១២)៖ <span class="bg-white px-2 py-0.5 rounded border border-indigo-200 font-bold text-brand-600">16</span> ម៉ោង</div>
+              <div class="flex items-center gap-1">គ្រូមូលដ្ឋាន (៧-៩)៖ <span class="bg-white px-2 py-0.5 rounded border border-indigo-200 font-bold text-brand-600">18</span> ម៉ោង</div>
+              <div class="flex items-center gap-1">សាលាជំនាន់ថ្មី៖ <span class="bg-white px-2 py-0.5 rounded border border-indigo-200 font-bold text-brand-600">20</span> ម៉ោង</div>
+              <div class="flex items-center gap-1">គ្រូបន្ទុកថ្នាក់៖ <span class="bg-white px-2 py-0.5 rounded border border-emerald-300 font-bold text-emerald-600">+3</span> ម៉ោង/ខែ</div>
+            </div>
+            <p class="text-[11px] text-indigo-700/80">
+              * រូបមន្តគណនាម៉ោងលើស/ខ្វះ ៖ <span class="font-bold">ម៉ោងបង្រៀនសរុបជាក់ស្ដែង - ម៉ោងកំណត់</span> (គណនាប្រាក់ឧបត្ថម្ភស្របតាមអនុក្រឹត្យលេខ ១០ អនក្រ.បក របស់រាជរដ្ឋាភិបាល)។
+            </p>
+          </div>
+
+          <!-- Add Teacher & Search Bar -->
+          <div class="bg-white border border-slate-200 p-4 rounded-2xl shadow-sm flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center gap-2 flex-1 min-w-[260px]">
+              <input v-model="newTeacher.name" placeholder="ឈ្មោះគ្រូ (ឧ. កង ចិត្រ)" class="flex-1 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-brand-500">
+              <select v-model="newTeacher.gender" class="text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none">
+                <option value="ប">ប្រុស (ប)</option>
+                <option value="ស">ស្រី (ស)</option>
+              </select>
+              <input v-model="newTeacher.phone" placeholder="លេខទូរស័ព្ទ" class="w-32 text-xs border border-slate-200 rounded-xl px-3 py-2 outline-none">
+              <button @click="addTeacher" class="px-5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-500/20 flex items-center gap-1.5 transition">
+                <i class="fa-solid fa-plus"></i> បន្ថែម
+              </button>
+            </div>
+            <div class="relative w-64">
+              <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+              <input placeholder="ស្វែងរកឈ្មោះ, ថ្នាក់..." class="w-full text-xs border border-slate-200 rounded-xl pl-8 pr-3 py-2 outline-none focus:border-brand-500">
+            </div>
+          </div>
+
+          <!-- Teacher Table -->
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <table class="w-full text-left text-xs text-slate-700">
+              <thead class="bg-slate-50 border-b border-slate-200 text-slate-500 font-semibold uppercase text-[11px]">
+                <tr>
+                  <th class="py-3 px-4 w-12 text-center">ល.រ</th>
+                  <th class="py-3 px-4">ឈ្មោះគ្រូ</th>
+                  <th class="py-3 px-4 text-center">ភេទ</th>
+                  <th class="py-3 px-4">ទូរស័ព្ទ</th>
+                  <th class="py-3 px-4 text-center">អតិបរមា/ថ្ងៃ</th>
+                  <th class="py-3 px-4">មុខវិជ្ជា និងកូដ</th>
+                  <th class="py-3 px-4 text-center">ម៉ោងបង្រៀន</th>
+                  <th class="py-3 px-4 text-center">ម៉ោងកំណត់</th>
+                  <th class="py-3 px-4 text-center">លើស/ខ្វះ</th>
+                  <th class="py-3 px-4 w-12 text-center">សកម្មភាព</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="(t, idx) in teachers" :key="idx" class="hover:bg-slate-50/80 transition">
+                  <td class="py-3 px-4 text-center text-slate-400 font-medium">{{ idx + 1 }}</td>
+                  <td class="py-3 px-4 font-bold text-slate-900 flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center text-[10px] font-bold text-slate-600">
+                      {{ t.gender }}
+                    </div>
+                    <span>{{ t.name }}</span>
+                  </td>
+                  <td class="py-3 px-4 text-center font-medium">{{ t.gender }}</td>
+                  <td class="py-3 px-4 font-mono text-slate-600">{{ t.phone }}</td>
+                  <td class="py-3 px-4 text-center">
+                    <span class="bg-slate-100 border border-slate-200 px-2 py-0.5 rounded font-bold">{{ t.maxPerDay || 4 }} ម៉ោង</span>
+                  </td>
+                  <td class="py-3 px-4">
+                    <span class="bg-indigo-50 border border-indigo-200 text-indigo-700 text-[11px] font-bold px-2 py-0.5 rounded-lg">{{ t.specialtyCode || 'K1' }}</span>
+                  </td>
+                  <td class="py-3 px-4 text-center font-bold text-slate-800">{{ t.actualHours || 18 }} ម៉ោង</td>
+                  <td class="py-3 px-4 text-center font-semibold text-slate-500">{{ t.targetHours || 16 }} ម៉ោង</td>
+                  <td class="py-3 px-4 text-center">
+                    <span :class="(t.actualHours - t.targetHours) >= 0 ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-rose-50 text-rose-700 border-rose-200'" class="px-2 py-0.5 rounded-md font-bold text-[11px] border">
+                      {{ (t.actualHours - t.targetHours) >= 0 ? '+' + (t.actualHours - t.targetHours) : (t.actualHours - t.targetHours) }} ម៉ោង
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-center">
+                    <button @click="deleteTeacher(idx)" class="text-rose-500 hover:text-rose-700 text-sm">
+                      <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- ================= PAGE 5: LIVE TRACKER (តាមដានម៉ោងសិក្សា) ================= -->
+        <div v-if="activeTab === 'live_tracker'" class="space-y-5">
+          <!-- Top Live Stats & Free Teachers Banner -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500 text-white flex items-center justify-center text-lg shadow-sm">
+                  <i class="fa-solid fa-clock"></i>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2">
+                    <h2 class="text-sm font-bold text-slate-900">តាមដានម៉ោងសិក្សាជាក់ស្ដែង (Live Matrix)</h2>
+                    <span class="bg-emerald-100 text-emerald-700 text-[10px] font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> កំពុងដំណើរការ
+                    </span>
+                  </div>
+                  <p class="text-[11px] text-slate-400">ផ្ទៀងផ្ទាត់ម៉ោងបង្រៀនជាក់ស្ដែង និងស្វែងរកគ្រូទំនេរសម្រាប់បង្រៀនជំនួស</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <span class="text-xs text-slate-500">ម៉ោងបច្ចុប្បន្ន៖</span>
+                <span class="bg-slate-100 border border-slate-200 text-slate-800 text-xs font-mono font-bold px-3 py-1.5 rounded-lg">
+                  {{ currentTimeFormatted }}
+                </span>
+                <span class="bg-brand-50 border border-brand-200 text-brand-700 text-xs font-bold px-3 py-1.5 rounded-lg">
+                  {{ activePeriodName }}
+                </span>
+              </div>
+            </div>
+
+            <!-- Free Teachers List for Substitution -->
+            <div>
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                  <i class="fa-solid fa-user-check text-emerald-600"></i>
+                  <span>គ្រូទំនេរម៉ោងនេះ (អាចចាត់តាំងបង្រៀនជំនួស) — <span class="text-emerald-600">{{ freeTeachers.length }} នាក់</span></span>
+                </h3>
+                <span class="text-[11px] text-slate-400">ចុចលើឈ្មោះដើម្បីចាត់តាំង</span>
+              </div>
+              <div class="flex flex-wrap gap-2">
+                <span v-for="(name, idx) in freeTeachers" :key="idx" 
+                      class="bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-200 border border-slate-200 text-slate-700 text-xs px-2.5 py-1 rounded-lg cursor-pointer transition flex items-center gap-1.5">
+                  <i class="fa-solid fa-user text-[10px] text-slate-400"></i>
+                  <span>{{ name }}</span>
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Full Live Grid Matrix -->
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+            <div class="p-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <span class="text-xs font-bold text-slate-800">ពេញមួយថ្ងៃសុក្រ — គ្រូ ៦៤ នាក់ (ចុចក្បាលជួរឈរ ដើម្បីមើលម៉ោងនោះ)</span>
+              <div class="flex items-center gap-2 text-xs">
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-amber-400 rounded"></span> វិទ្យាសាស្ត្រសង្គម</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 bg-emerald-500 rounded"></span> វិទ្យាសាស្ត្រពិត</span>
+              </div>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr class="bg-slate-100/80 border-b border-slate-200 text-slate-600 text-[11px] font-semibold text-center">
+                    <th class="py-2.5 px-4 text-left border-r border-slate-200 w-44">គ្រូបង្រៀន</th>
+                    <!-- Morning Periods -->
+                    <th @click="selectedLivePeriod = 1" :class="selectedLivePeriod === 1 ? 'bg-brand-100 text-brand-800 ring-2 ring-brand-500' : ''" class="py-2 px-3 border-r border-slate-200 cursor-pointer">
+                      <div>ព្រឹក 1</div>
+                      <div class="text-[10px] text-slate-400 font-normal">07:00 - 07:50</div>
+                    </th>
+                    <th @click="selectedLivePeriod = 2" :class="selectedLivePeriod === 2 ? 'bg-brand-100 text-brand-800 ring-2 ring-brand-500' : ''" class="py-2 px-3 border-r border-slate-200 cursor-pointer">
+                      <div>ព្រឹក 2</div>
+                      <div class="text-[10px] text-slate-400 font-normal">08:00 - 08:50</div>
+                    </th>
+                    <th @click="selectedLivePeriod = 3" :class="selectedLivePeriod === 3 ? 'bg-brand-100 text-brand-800 ring-2 ring-brand-500' : ''" class="py-2 px-3 border-r border-slate-200 cursor-pointer">
+                      <div class="font-bold text-brand-600">ព្រឹក 3 ★</div>
+                      <div class="text-[10px] text-slate-400 font-normal">09:00 - 09:50</div>
+                    </th>
+                    <th @click="selectedLivePeriod = 4" :class="selectedLivePeriod === 4 ? 'bg-brand-100 text-brand-800 ring-2 ring-brand-500' : ''" class="py-2 px-3 border-r border-slate-200 cursor-pointer">
+                      <div>ព្រឹក 4</div>
+                      <div class="text-[10px] text-slate-400 font-normal">10:00 - 10:50</div>
+                    </th>
+                    <th @click="selectedLivePeriod = 5" :class="selectedLivePeriod === 5 ? 'bg-brand-100 text-brand-800 ring-2 ring-brand-500' : ''" class="py-2 px-3 border-r border-slate-200 cursor-pointer">
+                      <div>ព្រឹក 5</div>
+                      <div class="text-[10px] text-slate-400 font-normal">11:00 - 11:50</div>
+                    </th>
+                    <!-- Afternoon Periods -->
+                    <th @click="selectedLivePeriod = 6" :class="selectedLivePeriod === 6 ? 'bg-brand-100 text-brand-800 ring-2 ring-brand-500' : ''" class="py-2 px-3 border-r border-slate-200 cursor-pointer">
+                      <div>រសៀល 1</div>
+                      <div class="text-[10px] text-slate-400 font-normal">13:00 - 13:50</div>
+                    </th>
+                    <th @click="selectedLivePeriod = 7" :class="selectedLivePeriod === 7 ? 'bg-brand-100 text-brand-800 ring-2 ring-brand-500' : ''" class="py-2 px-3 cursor-pointer">
+                      <div>រសៀល 2</div>
+                      <div class="text-[10px] text-slate-400 font-normal">14:00 - 14:50</div>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                  <tr v-for="(row, idx) in liveMatrixRows" :key="idx" class="hover:bg-slate-50/80 transition">
+                    <td class="py-2 px-4 font-bold text-slate-800 border-r border-slate-200 whitespace-nowrap">
+                      {{ row.teacher }}
+                    </td>
+                    <td v-for="p in 7" :key="p" class="py-1.5 px-2 text-center border-r border-slate-100">
+                      <span v-if="row.slots[p]" 
+                            :class="row.slots[p].color === 'green' ? 'bg-emerald-500 text-white' : 'bg-amber-400 text-amber-950'"
+                            class="inline-block px-2 py-0.5 rounded-md font-bold text-[11px] shadow-sm">
+                        {{ row.slots[p].className }}
+                      </span>
+                      <span v-else class="text-slate-200 text-[10px]">—</span>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= PAGE 6: TIMETABLE GENERATOR ================= -->
+        <div v-if="activeTab === 'timetable'" class="space-y-5">
+          <!-- Filter Controls & Action Bar -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">កាលវិភាគ — ម៉ាស៊ីនរៀបស្វ័យប្រវត្តិ</h2>
+                <p class="text-xs text-slate-500">ដាក់រួច 60/60 ម៉ោង — រៀបទាំងវេនព្រឹក និងរសៀលក្នុងពេលតែមួយដោយគ្មានជាន់ម៉ោង</p>
+              </div>
+
+              <!-- Top Mode Buttons -->
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="bg-slate-100 p-1 rounded-xl flex gap-1 border border-slate-200 text-xs">
+                  <button @click="generatorMode.school = 'normal'" :class="generatorMode.school === 'normal' ? 'bg-white shadow-sm font-bold text-brand-600' : 'text-slate-600'" class="px-3 py-1 rounded-lg">សាលាធម្មតា</button>
+                  <button @click="generatorMode.school = 'ngs'" :class="generatorMode.school === 'ngs' ? 'bg-white shadow-sm font-bold text-brand-600' : 'text-slate-600'" class="px-3 py-1 rounded-lg">សាលាជំនាន់ថ្មី</button>
+                </div>
+                <div class="bg-slate-100 p-1 rounded-xl flex gap-1 border border-slate-200 text-xs">
+                  <button @click="generatorMode.shift = 'morning'" :class="generatorMode.shift === 'morning' ? 'bg-amber-400 font-bold text-amber-950 shadow-sm' : 'text-slate-600'" class="px-3 py-1 rounded-lg">វេនព្រឹក</button>
+                  <button @click="generatorMode.shift = 'afternoon'" :class="generatorMode.shift === 'afternoon' ? 'bg-amber-400 font-bold text-amber-950 shadow-sm' : 'text-slate-600'" class="px-3 py-1 rounded-lg">វេនរសៀល</button>
+                </div>
+                <div class="bg-slate-100 p-1 rounded-xl flex gap-1 border border-slate-200 text-xs">
+                  <button class="px-2.5 py-1 rounded-lg text-slate-600 hover:bg-white">ទម្លាក់ ១ម៉ោង</button>
+                  <button class="px-2.5 py-1 rounded-lg bg-white shadow-sm font-bold text-brand-600">ទម្លាក់ ២ម៉ោងជាប់</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Generate Toolbar -->
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+              <div class="flex items-center gap-2">
+                <button @click="generateTimetable" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md shadow-brand-500/20 flex items-center gap-2 transition">
+                  <i class="fa-solid fa-wand-magic-sparkles text-amber-300"></i>
+                  <span>✨ រៀបទាំងវិទ្យាល័យនិងអនុវិទ្យាល័យ</span>
+                  <i class="fa-solid fa-chevron-down text-[10px]"></i>
+                </button>
+                <button @click="clearTimetable" class="px-3 py-2.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-700 text-xs font-semibold rounded-xl flex items-center gap-1.5 transition">
+                  <i class="fa-solid fa-eraser"></i> សម្អាត
+                </button>
+                <button @click="showConstraints = !showConstraints" class="p-2.5 border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 transition">
+                  <i class="fa-solid fa-sliders"></i>
+                </button>
+              </div>
+
+              <div class="flex items-center gap-2 text-xs">
+                <span class="text-slate-400">ទិដ្ឋភាព៖</span>
+                <button @click="timetableView = 'class'" :class="timetableView === 'class' ? 'bg-brand-100 text-brand-700 font-bold' : 'text-slate-600'" class="px-3 py-1 rounded-lg border border-slate-200">តាមថ្នាក់</button>
+                <button @click="timetableView = 'teacher'" :class="timetableView === 'teacher' ? 'bg-brand-100 text-brand-700 font-bold' : 'text-slate-600'" class="px-3 py-1 rounded-lg border border-slate-200">តាមគ្រូ</button>
+              </div>
+            </div>
+
+            <!-- Constraints Settings Panel -->
+            <div v-if="showConstraints" class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+              <h4 class="text-xs font-bold text-slate-800">ការកំណត់លក្ខខណ្ឌ (Scheduling Constraints)</h4>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked class="rounded text-brand-600">
+                  <span class="text-slate-700">គោរពចំនួនម៉ោងបង្រៀនអតិបរមារបស់គ្រូ</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" class="rounded text-brand-600">
+                  <span class="text-slate-700">មិនឱ្យគ្រូបង្រៀនជាប់គ្នាលើសពី ២ម៉ោង (Beta)</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked class="rounded text-brand-600">
+                  <span class="text-slate-700">ចាក់សោមុខវិជ្ជាស្នូល (គណិត រូប គីមី) ពេលព្រឹក (Beta)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Generated Timetable Table Display (Class 12A) -->
+          <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden p-5">
+            <div class="flex items-center justify-between mb-4">
+              <div>
+                <h3 class="text-sm font-bold text-slate-900">កាលវិភាគថ្នាក់ទី ១២ ក (វេនព្រឹក)</h3>
+                <p class="text-xs text-slate-400">បន្ទប់ ១០១ • គ្រូបន្ទុកថ្នាក់៖ កង ចិត្រ • សិស្ស ៣៥ នាក់</p>
+              </div>
+              <button class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 rounded-lg text-xs font-semibold text-slate-700 flex items-center gap-1.5">
+                <i class="fa-solid fa-print"></i> បោះពុម្ពកាលវិភាគនេះ
+              </button>
+            </div>
+
+            <div class="overflow-x-auto">
+              <table class="w-full text-center text-xs border border-slate-200 rounded-xl overflow-hidden">
+                <thead class="bg-slate-100 text-slate-700 font-bold">
+                  <tr>
+                    <th class="py-2.5 px-3 border border-slate-200 w-24">ម៉ោង \ ថ្ងៃ</th>
+                    <th class="py-2.5 px-3 border border-slate-200">ច័ន្ទ</th>
+                    <th class="py-2.5 px-3 border border-slate-200">អង្គារ</th>
+                    <th class="py-2.5 px-3 border border-slate-200">ពុធ</th>
+                    <th class="py-2.5 px-3 border border-slate-200">ព្រហស្បតិ៍</th>
+                    <th class="py-2.5 px-3 border border-slate-200">សុក្រ</th>
+                    <th class="py-2.5 px-3 border border-slate-200">សៅរ៍</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr v-for="period in 5" :key="period">
+                    <td class="py-3 px-2 border border-slate-200 bg-slate-50 font-bold text-slate-600">
+                      ម៉ោងទី {{ period }}<br>
+                      <span class="text-[10px] font-normal text-slate-400">{{ formatPeriodTime(period) }}</span>
+                    </td>
+                    <td v-for="day in 6" :key="day" class="py-2 px-2 border border-slate-200 hover:bg-slate-50/80 transition">
+                      <div class="p-2 rounded-xl border border-slate-100 shadow-sm" :style="{ backgroundColor: getSlotData(day, period).bgColor }">
+                        <div class="font-bold text-slate-900 text-xs">{{ getSlotData(day, period).subject }}</div>
+                        <div class="text-[10px] text-slate-500 mt-0.5">{{ getSlotData(day, period).teacher }}</div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= PAGE 7: OVERTIME & 15 OFFICIAL REPORTS ================= -->
+        <div v-if="activeTab === 'overtime'" class="space-y-5">
+          <!-- Official Overtime Rates & Parameters -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 pb-3">
+              <div>
+                <h2 class="text-base font-bold text-slate-900">ម៉ោងបន្ថែម និងរបាយការណ៍ផ្លូវការក្រសួង</h2>
+                <p class="text-xs text-slate-500">គណនាប្រាក់ម៉ោងបង្រៀនលើស និងចេញទម្រង់លិខិតរដ្ឋបាលផ្លូវការទាំង ១៥</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <button class="px-3 py-1.5 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg text-xs font-semibold flex items-center gap-1.5"><i class="fa-solid fa-file-excel"></i> Excel</button>
+                <button class="px-3 py-1.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg text-xs font-semibold flex items-center gap-1.5"><i class="fa-solid fa-file-pdf"></i> PDF</button>
+                <button class="px-4 py-1.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5"><i class="fa-solid fa-print"></i> បោះពុម្ព</button>
+              </div>
+            </div>
+
+            <!-- Rate Box -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span class="text-[11px] text-slate-500">មធ្យមសិក្សាទុតិយភូមិ (ក្របខ័ណ្ឌ ក)</span>
+                <div class="text-base font-extrabold text-brand-700 mt-0.5">10,400 រៀល/ម៉ោង</div>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span class="text-[11px] text-slate-500">មធ្យមសិក្សាបឋមភូមិ (ក្របខ័ណ្ឌ ខ)</span>
+                <div class="text-base font-extrabold text-brand-700 mt-0.5">5,500 រៀល/ម៉ោង</div>
+              </div>
+              <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                <span class="text-[11px] text-slate-500">កម្រិតបឋមសិក្សា (ក្របខ័ណ្ឌ គ)</span>
+                <div class="text-base font-extrabold text-brand-700 mt-0.5">4,500 រៀល/ម៉ោង</div>
+              </div>
+            </div>
+
+            <!-- 15 Report Buttons Selector -->
+            <div>
+              <span class="text-xs font-bold text-slate-700 block mb-2">ជ្រើសរើសទម្រង់លិខិតផ្លូវការ៖</span>
+              <div class="flex flex-wrap gap-1.5">
+                <button v-for="(rep, idx) in reportTypes" :key="idx" 
+                        @click="selectedReport = rep.id"
+                        :class="selectedReport === rep.id ? 'bg-brand-600 text-white font-bold shadow-sm' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'"
+                        class="px-2.5 py-1.5 rounded-lg text-xs transition">
+                  {{ rep.name }}
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Official Cambodian Government Letter Preview -->
+          <div class="bg-white border border-slate-300 rounded-2xl p-8 shadow-sm print-area space-y-6">
+            <!-- Official Header -->
+            <div class="flex justify-between items-start">
+              <div class="text-xs space-y-1">
+                <div class="font-bold text-slate-900">ការិយាល័យអប់រំ យុវជន និងកីឡា ស្រុក...</div>
+                <div class="font-bold text-slate-900">{{ school.name }}</div>
+                <div class="text-slate-400">លេខ៖ ....................</div>
+              </div>
+              <div class="text-center">
+                <div class="text-xs font-bold text-slate-900 tracking-wider">ព្រះរាជាណាចក្រកម្ពុជា</div>
+                <div class="text-xs font-bold text-slate-900">ជាតិ សាសនា ព្រះមហាក្សត្រ</div>
+                <div class="w-16 h-0.5 bg-slate-800 mx-auto mt-1"></div>
+              </div>
+            </div>
+
+            <!-- Document Title -->
+            <div class="text-center space-y-1">
+              <h2 class="text-sm font-bold text-slate-900 uppercase">{{ currentReportTitle }}</h2>
+              <p class="text-xs text-slate-600">ប្រចាំខែ កញ្ញា ឆ្នាំ ២០២៦ ឆ្នាំសិក្សា ២០២១-២០២៥</p>
+            </div>
+
+            <!-- Table Content -->
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs border border-slate-300">
+                <thead class="bg-slate-100 text-slate-800 font-bold text-center border-b border-slate-300">
+                  <tr>
+                    <th class="p-2 border-r border-slate-300 w-12">ល.រ</th>
+                    <th class="p-2 border-r border-slate-300">គោត្តនាម នាម</th>
+                    <th class="p-2 border-r border-slate-300 w-14">ភេទ</th>
+                    <th class="p-2 border-r border-slate-300">ក្របខ័ណ្ឌ</th>
+                    <th class="p-2 border-r border-slate-300">មុខវិជ្ជា</th>
+                    <th class="p-2 border-r border-slate-300 text-center">ម៉ោងបង្រៀន</th>
+                    <th class="p-2 border-r border-slate-300 text-center">ម៉ោងកំណត់</th>
+                    <th class="p-2 border-r border-slate-300 text-center">ម៉ោងលើស</th>
+                    <th class="p-2 border-r border-slate-300 text-center">តម្លៃ/ម៉ោង</th>
+                    <th class="p-2 text-right">ទឹកប្រាក់សរុប</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200">
+                  <tr v-for="(t, idx) in teachers" :key="idx">
+                    <td class="p-2 text-center border-r border-slate-300">{{ idx + 1 }}</td>
+                    <td class="p-2 font-bold border-r border-slate-300">{{ t.name }}</td>
+                    <td class="p-2 text-center border-r border-slate-300">{{ t.gender }}</td>
+                    <td class="p-2 border-r border-slate-300">ក1.1</td>
+                    <td class="p-2 border-r border-slate-300">{{ t.subject || 'គណិតវិទ្យា' }}</td>
+                    <td class="p-2 text-center border-r border-slate-300 font-bold">18</td>
+                    <td class="p-2 text-center border-r border-slate-300">16</td>
+                    <td class="p-2 text-center border-r border-slate-300 font-bold text-emerald-600">2</td>
+                    <td class="p-2 text-center border-r border-slate-300">10,400 ៛</td>
+                    <td class="p-2 text-right font-bold text-brand-700">83,200 ៛</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Signatures Section -->
+            <div class="flex justify-between items-end pt-8 text-xs text-center">
+              <div>
+                <p class="font-bold">បានឃើញ និងឯកភាព</p>
+                <p class="font-bold">ប្រធានការិយាល័យអប់រំ យុវជន និងកីឡា</p>
+              </div>
+              <div>
+                <p class="text-slate-500">ថ្ងៃទី ២៦ ខែ តុលា ឆ្នាំ ២០២៦</p>
+                <p class="font-bold mt-1">នាយកវិទ្យាល័យ</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= PAGE 8: SETTINGS ================= -->
+        <div v-if="activeTab === 'settings'" class="max-w-2xl bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-5">
+          <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
+            <h2 class="text-base font-bold text-slate-900">ការកំណត់ប្រព័ន្ធទូទៅ</h2>
+            <button @click="saveSettings" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-xl shadow-md transition">
+              <i class="fa-solid fa-floppy-disk mr-1"></i> រក្សាទុក
+            </button>
+          </div>
+
+          <div class="space-y-4 text-xs">
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">ឈ្មោះគ្រឹះស្ថានសិក្សា</label>
+              <input v-model="school.name" class="w-full border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-brand-500">
+            </div>
+
+            <div>
+              <label class="block font-semibold text-slate-700 mb-1">ឆ្នាំសិក្សា</label>
+              <input v-model="school.year" class="w-full border border-slate-200 rounded-xl px-3 py-2 outline-none focus:border-brand-500">
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">ចំនួនម៉ោងរៀនព្រឹក</label>
+                <input v-model="settings.morningHours" type="number" class="w-full border border-slate-200 rounded-xl px-3 py-2 outline-none">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">ចំនួនម៉ោងរៀនរសៀល</label>
+                <input v-model="settings.afternoonHours" type="number" class="w-full border border-slate-200 rounded-xl px-3 py-2 outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">ម៉ោងចូលរៀនព្រឹក</label>
+                <input v-model="settings.morningStart" type="time" class="w-full border border-slate-200 rounded-xl px-3 py-2 outline-none">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">ម៉ោងចូលរៀនរសៀល</label>
+                <input v-model="settings.afternoonStart" type="time" class="w-full border border-slate-200 rounded-xl px-3 py-2 outline-none">
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">រយៈពេល ១ម៉ោង (នាទី) <span class="text-brand-600 font-normal">(ក្រសួងកំណត់ 50 នាទី)</span></label>
+                <input v-model="settings.periodDuration" type="number" class="w-full border border-slate-200 rounded-xl px-3 py-2 outline-none">
+              </div>
+              <div>
+                <label class="block font-semibold text-slate-700 mb-1">សម្រាករវាងម៉ោង (នាទី)</label>
+                <input v-model="settings.recessDuration" type="number" class="w-full border border-slate-200 rounded-xl px-3 py-2 outline-none">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </main>
+
+    <!-- ADMIN MASTER CENTER MODAL -->
+    <div v-if="showAdminCenter" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+      <div class="bg-white rounded-3xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-100">
+        <!-- Header -->
+        <div class="p-6 bg-gradient-to-r from-brand-900 via-indigo-900 to-purple-900 text-white flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-400/30 flex items-center justify-center text-amber-400 text-lg">
+              <i class="fa-solid fa-crown"></i>
+            </div>
+            <div>
+              <div class="flex items-center gap-2">
+                <h3 class="text-sm font-bold">មជ្ឈមណ្ឌលគ្រប់គ្រង Admin</h3>
+                <span class="bg-amber-400 text-amber-950 text-[10px] font-bold px-1.5 py-0.5 rounded">MASTER</span>
+              </div>
+              <p class="text-[11px] text-indigo-200">គ្រប់គ្រងសាលារៀន និងលេខកូដចុះឈ្មោះ</p>
+            </div>
+          </div>
+          <button @click="showAdminCenter = false" class="text-white/60 hover:text-white text-sm">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+
+        <div class="p-6 space-y-4">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+            <span class="text-xs font-bold text-slate-800">លេខកូដចុះឈ្មោះ (Activation License Codes)</span>
+            <button class="px-3 py-1 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-lg shadow-sm">
+              + បង្កើតកូដថ្មី
+            </button>
+          </div>
+
+          <div class="space-y-2">
+            <div class="p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+              <div>
+                <span class="font-mono text-xs font-bold text-slate-800">TIMETABLE-2026-A1</span>
+                <p class="text-[10px] text-slate-400">បង្កើតកាលពី៖ 2026-10-23</p>
+              </div>
+              <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] px-2 py-0.5 rounded-md font-bold">
+                ✔ នៅទំនេរ (អាចប្រើបាន)
+              </span>
+            </div>
+            <div class="p-3 rounded-xl border border-slate-200 flex items-center justify-between">
+              <div>
+                <span class="font-mono text-xs font-bold text-slate-800">TIMETABLE-2026-B2</span>
+                <p class="text-[10px] text-slate-400">បង្កើតកាលពី៖ 2026-10-23</p>
+              </div>
+              <span class="bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px] px-2 py-0.5 rounded-md font-bold">
+                ✔ នៅទំនេរ (អាចប្រើបាន)
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- VUE APPLICATION LOGIC -->
+  <script>
+    const { createApp, ref, computed } = Vue;
+
+    createApp({
+      setup() {
+        const activeTab = ref('dashboard');
+        const showAdminCenter = ref(false);
+        const showSchoolModal = ref(false);
+        const showLoginModal = ref(false);
+        const showConstraints = ref(false);
+        const selectedTrack = ref('science');
+        const selectedReport = ref('disbursement');
+        const selectedLivePeriod = ref(3);
+        const timetableView = ref('class');
+
+        const school = ref({
+          name: 'វិទ្យាល័យ ហ៊ុន សែន ស្មាច់មានជ័យ',
+          year: '២០២៤-២០២៥'
+        });
+
+        const settings = ref({
+          morningHours: 5,
+          afternoonHours: 4,
+          morningStart: '07:00',
+          afternoonStart: '13:00',
+          periodDuration: 50,
+          recessDuration: 10
+        });
+
+        const setupSteps = ref([
+          { title: '១. កំណត់ម៉ោងសិក្សា (វេនព្រឹក/រសៀល)', tab: 'settings', done: true },
+          { title: '២. បញ្ចូលបន្ទប់រៀន', tab: 'dashboard', done: true },
+          { title: '៣. កំណត់កម្រិត/ថ្នាក់ និងចំនួនសិស្ស', tab: 'classes', done: true },
+          { title: '៤. បញ្ចូលមុខវិជ្ជា', tab: 'subjects', done: true },
+          { title: '៥. បញ្ចូលគ្រូ និងម៉ោងកំណត់', tab: 'teachers', done: true },
+          { title: '៦. ចាត់ចែងគ្រូបង្រៀនតាមថ្នាក់', tab: 'classes', done: true },
+          { title: '៧. រៀបកាលវិភាគស្វ័យប្រវត្តិ', tab: 'timetable', done: true }
+        ]);
+
+        const subjects = ref([
+          { name: 'ភាសាខ្មែរ', shortName: 'ខ្មែរ', code: 'K', color: '#F59E0B' },
+          { name: 'គណិតវិទ្យា', shortName: 'គណិត', code: 'M', color: '#10B981' },
+          { name: 'រូបវិទ្យា', shortName: 'រូប', code: 'P', color: '#3B82F6' },
+          { name: 'គីមីវិទ្យា', shortName: 'គីមី', code: 'C', color: '#F97316' },
+          { name: 'ជីវវិទ្យា', shortName: 'ជីវ', code: 'B', color: '#8B5CF6' },
+          { name: 'ផែនដីវិទ្យា', shortName: 'ផែនដី', code: 'ES', color: '#34D399' },
+          { name: 'ភូមិវិទ្យា', shortName: 'ភូមិ', code: 'G', color: '#EF4444' },
+          { name: 'ប្រវត្តិវិទ្យា', shortName: 'ប្រវត្តិ', code: 'H', color: '#0EA5E9' },
+          { name: 'ពលរដ្ឋវិជ្ជា', shortName: 'ពលរដ្ឋ', code: 'ED', color: '#A855F7' },
+          { name: 'ភាសាអង់គ្លេស', shortName: 'អង់គ្លេស', code: 'EN', color: '#14B8A6' },
+          { name: 'ព័ត៌មានវិទ្យា', shortName: 'កុំព្យូទ័រ', code: 'IT', color: '#64748B' },
+          { name: 'អប់រំកាយ & កីឡា', shortName: 'កីឡា', code: 'PE', color: '#F43F5E' }
+        ]);
+
+        const newSubject = ref({ name: '', shortName: '', code: '', color: '#4F46E5' });
+
+        const teachers = ref([
+          { name: 'កង ចិត្រ', gender: 'ប', phone: '012345678', maxPerDay: 4, specialtyCode: 'M1', targetHours: 16, actualHours: 18, subject: 'គណិតវិទ្យា' },
+          { name: 'កង សុគុណ', gender: 'ប', phone: '098765432', maxPerDay: 4, specialtyCode: 'P1', targetHours: 16, actualHours: 18, subject: 'រូបវិទ្យា' },
+          { name: 'ញឹម វាសនា', gender: 'ប', phone: '012987654', maxPerDay: 4, specialtyCode: 'K1', targetHours: 16, actualHours: 17, subject: 'ភាសាខ្មែរ' },
+          { name: 'ប៊ិន សេរីរ័ត្ន', gender: 'ស', phone: '088765432', maxPerDay: 4, specialtyCode: 'C1', targetHours: 16, actualHours: 16, subject: 'គីមីវិទ្យា' },
+          { name: 'ឃ្លួន សុគន្ធា', gender: 'ស', phone: '097123456', maxPerDay: 4, specialtyCode: 'B1', targetHours: 16, actualHours: 19, subject: 'ជីវវិទ្យា' }
+        ]);
+
+        const newTeacher = ref({ name: '', gender: 'ប', phone: '' });
+
+        const classes = ref([
+          { name: '១២ ក', track: 'វិទ្យាសាស្ត្រពិត', shift: 'ព្រឹក', students: 35, female: 20 },
+          { name: '១២ ខ', track: 'វិទ្យាសាស្ត្រពិត', shift: 'ព្រឹក', students: 38, female: 22 },
+          { name: '១២ គ', track: 'វិទ្យាសាស្ត្រសង្គម', shift: 'ព្រឹក', students: 40, female: 25 },
+          { name: '១១ ក', track: 'វិទ្យាសាស្ត្រពិត', shift: 'រសៀល', students: 36, female: 18 },
+          { name: '១០ ក', track: 'ទូទៅ', shift: 'រសៀល', students: 42, female: 23 }
+        ]);
+
+        const rooms = ref([
+          { name: 'បន្ទប់ ១០១', building: 'អគារ ហ៊ុន សែន' },
+          { name: 'បន្ទប់ ១០២', building: 'អគារ ហ៊ុន សែន' },
+          { name: 'បន្ទប់ ២០១', building: 'អគារ ហ៊ុន សែន' }
+        ]);
+
+        const freeTeachers = ref([
+          'រស់ ផានី', 'ទៀវ ដាលីន', 'យ៉ន មករា', 'ពៅ សេរីរ័ត្ន', 'ហេង សុភា',
+          'នួន ចាន់ថា', 'ផល សុភ័ក្ត្រ', 'ថា សុវណ្ណ', 'ឈួន លីដា', 'ប៊ិន កញ្ញា'
+        ]);
+
+        const liveMatrixRows = ref([
+          { teacher: 'ញឹម វាសនា', slots: { 3: { className: '12B', color: 'amber' }, 4: { className: '12B', color: 'amber' }, 5: { className: '10J', color: 'amber' } } },
+          { teacher: 'ប៊ិន សេរីរ័ត្ន', slots: { 1: { className: '12E', color: 'amber' }, 2: { className: '11D', color: 'amber' }, 3: { className: '11D', color: 'amber' } } },
+          { teacher: 'ឃ្លួន សុគន្ធា', slots: { 1: { className: '11H', color: 'amber' }, 2: { className: '11H', color: 'amber' }, 3: { className: '12I', color: 'amber' }, 4: { className: '12I', color: 'amber' } } },
+          { teacher: 'ញឹម កញ្ញា', slots: { 1: { className: '7E', color: 'amber' }, 2: { className: '7E', color: 'amber' }, 3: { className: '10G', color: 'amber' }, 4: { className: '10G', color: 'amber' } } },
+          { teacher: 'កង ចិត្រ', slots: { 1: { className: '12A', color: 'green' }, 2: { className: '12A', color: 'green' }, 3: { className: '11E', color: 'green' }, 4: { className: '11E', color: 'green' } } }
+        ]);
+
+        const reportTypes = ref([
+          { id: 'disbursement', name: 'តារាងទូទាត់ប្រាក់ប្រចាំខែ' },
+          { id: 'request_letter', name: 'សំណើសុំប្រាក់ប្រចាំខែ' },
+          { id: 'mission_letter', name: 'លិខិតឧទ្ទេសនាមម៉ោងបន្ថែម' },
+          { id: 'monthly_summary', name: 'សម្រង់ម៉ោងបន្ថែមខែ' },
+          { id: 'weekly_service', name: 'សេវាប្រចាំសប្ដាហ៍' },
+          { id: 'template_10', name: 'គំរូទី១០ អវត្តមានប្រចាំខែ' },
+          { id: 'budget_plan', name: 'ផែនការសរុបប្រាក់ម៉ោង' },
+          { id: 'demographics', name: 'ស្ថិតិបុគ្គលិក ថ្នាក់ សិស្ស' }
+        ]);
+
+        const generatorMode = ref({ school: 'normal', shift: 'morning' });
+
+        const addSubject = () => {
+          if (!newSubject.value.name || !newSubject.value.code) return;
+          subjects.value.push({ ...newSubject.value });
+          newSubject.value = { name: '', shortName: '', code: '', color: '#4F46E5' };
+        };
+
+        const deleteSubject = (idx) => subjects.value.splice(idx, 1);
+
+        const addTeacher = () => {
+          if (!newTeacher.value.name) return;
+          teachers.value.push({
+            ...newTeacher.value,
+            maxPerDay: 4,
+            specialtyCode: 'K' + (teachers.value.length + 1),
+            targetHours: 16,
+            actualHours: 16
+          });
+          newTeacher.value = { name: '', gender: 'ប', phone: '' };
+        };
+
+        const deleteTeacher = (idx) => teachers.value.splice(idx, 1);
+
+        const generateTimetable = () => {
+          alert('កាលវិភាគស្វ័យប្រវត្តិត្រូវបានបង្កើតជោគជ័យ! គ្មានការជាន់ម៉ោងគ្រូ និងបន្ទប់ឡើយ។');
+        };
+
+        const clearTimetable = () => {
+          if (confirm('តើអ្នកពិតជាចង់សម្អាតកាលវិភាគឡើងវិញមែនទេ?')) {
+            alert('កាលវិភាគត្រូវបានសម្អាតរួចរាល់។');
+          }
+        };
+
+        const formatPeriodTime = (p) => {
+          const times = ['07:00 - 07:50', '08:00 - 08:50', '09:00 - 09:50', '10:00 - 10:50', '11:00 - 11:50'];
+          return times[p - 1] || '';
+        };
+
+        const getSlotData = (day, period) => {
+          const timetableDemo = [
+            { subject: 'គណិតវិទ្យា', teacher: 'កង ចិត្រ', bgColor: '#ECFDF5' },
+            { subject: 'រូបវិទ្យា', teacher: 'កង សុគុណ', bgColor: '#EFF6FF' },
+            { subject: 'ភាសាខ្មែរ', teacher: 'ញឹម វាសនា', bgColor: '#FEF3C7' },
+            { subject: 'គីមីវិទ្យា', teacher: 'ប៊ិន សេរីរ័ត្ន', bgColor: '#FFF7ED' },
+            { subject: 'ជីវវិទ្យា', teacher: 'ឃ្លួន សុគន្ធា', bgColor: '#F5F3FF' }
+          ];
+          return timetableDemo[(day + period) % timetableDemo.length];
+        };
+
+        const navClass = (tab) => {
+          return activeTab.value === tab 
+            ? 'flex items-center gap-2.5 w-full px-3 py-2 rounded-xl bg-brand-50 text-brand-700 font-bold border border-brand-200/60 shadow-sm transition' 
+            : 'flex items-center gap-2.5 w-full px-3 py-2 rounded-xl text-slate-600 hover:bg-slate-100/80 hover:text-slate-900 transition';
+        };
+
+        const tabTitle = (tab) => {
+          const map = {
+            dashboard: 'ទំព័រដើម (Dashboard)',
+            subjects: 'មុខវិជ្ជា (Subjects)',
+            curriculum: 'កម្មវិធីសិក្សា និងម៉ោងបង្រៀន',
+            teachers: 'គ្រប់គ្រងគ្រូបង្រៀន និងម៉ោងកំណត់',
+            classes: 'គ្រប់គ្រងថ្នាក់រៀន',
+            duties: 'តារាងបែងចែកភារកិច្ចគ្រូ',
+            timetable: 'ម៉ាស៊ីនរៀបកាលវិភាគស្វ័យប្រវត្តិ',
+            live_tracker: 'តាមដានម៉ោងសិក្សាជាក់ស្ដែង (Live Matrix)',
+            overtime: 'ម៉ោងបន្ថែម និងរបាយការណ៍ផ្លូវការក្រសួង',
+            years: 'ឆ្នាំសិក្សា និងប្រព័ន្ធកំណែកាលវិភាគ',
+            print_hub: 'មជ្ឈមណ្ឌលបោះពុម្ពកាលវិភាគ',
+            batch_excel: 'បញ្ចូលរហ័ស (ដូច Excel)',
+            excel_io: 'Excel នាំចូល និងនាំចេញ',
+            settings: 'ការកំណត់ប្រព័ន្ធ',
+            guide: 'មគ្គុទ្ទេសក៍ណែនាំការប្រើប្រាស់'
+          };
+          return map[tab] || 'កាលវិភាគសាលា';
+        };
+
+        const tabIcon = (tab) => {
+          const map = {
+            dashboard: 'fa-solid fa-chart-pie',
+            subjects: 'fa-solid fa-book',
+            curriculum: 'fa-solid fa-list-check',
+            teachers: 'fa-solid fa-user-tie',
+            classes: 'fa-solid fa-graduation-cap',
+            duties: 'fa-solid fa-clipboard-user',
+            timetable: 'fa-solid fa-calendar-day',
+            live_tracker: 'fa-solid fa-clock',
+            overtime: 'fa-solid fa-money-bill-wave',
+            years: 'fa-solid fa-clock-rotate-left',
+            print_hub: 'fa-solid fa-print',
+            batch_excel: 'fa-solid fa-table-cells',
+            excel_io: 'fa-solid fa-file-excel',
+            settings: 'fa-solid fa-gear',
+            guide: 'fa-solid fa-circle-question'
+          };
+          return map[tab] || 'fa-solid fa-calendar';
+        };
+
+        const currentTimeFormatted = computed(() => '09:25:40 AM');
+        const activePeriodName = computed(() => 'ព្រឹក 3 (09:00 - 09:50)');
+        const currentReportTitle = computed(() => {
+          const found = reportTypes.value.find(r => r.id === selectedReport.value);
+          return found ? found.name : 'តារាងទូទាត់ប្រាក់ម៉ោងបន្ថែម';
+        });
+
+        const saveSettings = () => alert('ការកំណត់ត្រូវបានរក្សាទុកដោយជោគជ័យ!');
+
+        return {
+          activeTab,
+          showAdminCenter,
+          showSchoolModal,
+          showLoginModal,
+          showConstraints,
+          selectedTrack,
+          selectedReport,
+          selectedLivePeriod,
+          timetableView,
+          school,
+          settings,
+          setupSteps,
+          subjects,
+          newSubject,
+          teachers,
+          newTeacher,
+          classes,
+          rooms,
+          freeTeachers,
+          liveMatrixRows,
+          reportTypes,
+          generatorMode,
+          addSubject,
+          deleteSubject,
+          addTeacher,
+          deleteTeacher,
+          generateTimetable,
+          clearTimetable,
+          formatPeriodTime,
+          getSlotData,
+          navClass,
+          tabTitle,
+          tabIcon,
+          currentTimeFormatted,
+          activePeriodName,
+          currentReportTitle,
+          saveSettings
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
